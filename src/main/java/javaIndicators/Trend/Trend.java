@@ -10,7 +10,6 @@ public class Trend {
 	
 	private class AccumulationDistributionLine {
 		double moneyFlowMultiplier;
-		double periodVolume;
 		double moneyFlowVolume;
 		double accumulationDistributionLine;
 
@@ -19,14 +18,12 @@ public class Trend {
 		public AccumulationDistributionLine()
 		{
 			moneyFlowVolume = 0;
-			periodVolume = 0;
 		}		
 		public double addTick(Tick tick)
 		{
-			periodVolume += tick.tradedVolume;
 			moneyFlowMultiplier = ((tick.close - tick.low) - (tick.high - tick.close))/(tick.high - tick.low); 
 			moneyFlowVolume = moneyFlowMultiplier * tick.tradedVolume; 
-			accumulationDistributionLine = accumulationDistributionLine + moneyFlowVolume;
+			accumulationDistributionLine += moneyFlowVolume;
 			return accumulationDistributionLine;
 		}		
 

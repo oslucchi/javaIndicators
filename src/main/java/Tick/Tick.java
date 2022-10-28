@@ -1,7 +1,13 @@
 package Tick;
+import java.io.Serializable;
 import java.util.Date;
 
-public class Tick {
+public class Tick implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 9190360877367065225L;
+	
 	public Date timestamp;
 	public double open;
 	public double close;
