@@ -19,17 +19,17 @@ import org.junit.Test;
 import Tick.Tick;
 
 public class DataLoader {
+	static List<Tick> tickList = new ArrayList<Tick>();
 	
 	@Ignore
 	@Test
 	public void readData() {
 		BufferedReader reader;
-		List<Tick> tickList = new ArrayList<Tick>();
 		String[] split;
 		Tick tick;
 		try {
 			Date start = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2022/10/01 09:00:03");
-			reader = new BufferedReader(new FileReader("/tmp/HistorycalData.csv"));
+			reader = new BufferedReader(new FileReader("/tmp/adx.csv"));
 			String line = reader.readLine();
 			while (line != null) {
 				split = line.split(";");
@@ -46,7 +46,7 @@ public class DataLoader {
 				line = reader.readLine();
 			}
 			reader.close();
-            FileOutputStream fos = new FileOutputStream("docs/listData");
+            FileOutputStream fos = new FileOutputStream("docs/ADLlistData");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(tickList);
             oos.close();
@@ -57,12 +57,10 @@ public class DataLoader {
 		}
 	}
 
-	@Ignore
 	@SuppressWarnings("unchecked")
-	@Test
-	public void useSavedData() {
-        List<Tick> tickList = new ArrayList<Tick>();
-        String filename = "docs/listData";
+	public static ArrayList<Tick> populateTestData() {
+		ArrayList<Tick> tickList = new ArrayList<Tick>();
+        String filename = "docs/ADLlistData";
           
         try
         {   
@@ -75,27 +73,24 @@ public class DataLoader {
               
             in.close();
             file.close();
-            SimpleDateFormat df = new SimpleDateFormat("yy/MM/dd HH:mm:ss:S");
-            for(int i = 0; i < tickList.size(); i++)
-            {
-            	System.out.format("%s - %5.2f %5.2f %5.2f %5.2f %09d\n",
-  					  df.format(tickList.get(i).timestamp),
-  					  tickList.get(i).open,
-					  tickList.get(i).high,
-					  tickList.get(i).low,
-					  tickList.get(i).close,
-					  tickList.get(i).tradedVolume);
-            }
+//            SimpleDateFormat df = new SimpleDateFormat("yy/MM/dd HH:mm:ss:S");
+//            for(int i = 0; i < tickList.size(); i++)
+//            {
+//            	System.out.format("%s - %5.2f %5.2f %5.2f %5.2f %09d\n",
+//  					  df.format(tickList.get(i).timestamp),
+//  					  tickList.get(i).open,
+//					  tickList.get(i).high,
+//					  tickList.get(i).low,
+//					  tickList.get(i).close,
+//					  tickList.get(i).tradedVolume);
+//            }
         }
           
-        catch(IOException ex)
+        catch(IOException | ClassNotFoundException ex)
         {
-            System.out.println("IOException is caught");
-        }
-          
-        catch(ClassNotFoundException ex)
-        {
-            System.out.println("ClassNotFoundException is caught");
-        }         
+        	ex.printStackTrace();
+        }    
+        
+        return tickList;
 	}
 }

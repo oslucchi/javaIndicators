@@ -8,7 +8,7 @@ public class Trend {
 	private AverageDirectionalIndex adx;
 	private TickLogger tl = TickLogger.getInstance();
 	
-	private class AccumulationDistributionLine {
+	public class AccumulationDistributionLine {
 		double moneyFlowMultiplier;
 		double moneyFlowVolume;
 		double accumulationDistributionLine;
@@ -19,12 +19,12 @@ public class Trend {
 		{
 			moneyFlowVolume = 0;
 		}		
-		public double addTick(Tick tick)
+		public void addItem()
 		{
+			Tick tick = tl.getClosureOfDay(TickLogger.CONTINUOUS, 0);
 			moneyFlowMultiplier = ((tick.close - tick.low) - (tick.high - tick.close))/(tick.high - tick.low); 
 			moneyFlowVolume = moneyFlowMultiplier * tick.tradedVolume; 
 			accumulationDistributionLine += moneyFlowVolume;
-			return accumulationDistributionLine;
 		}		
 
 		public double getValue()
@@ -33,7 +33,7 @@ public class Trend {
 		}
 	}
 	
-	private class AverageDirectionalIndex {
+	public class AverageDirectionalIndex {
 		public static final int CROSS_POSITIVE = 2;
 		public static final int POSITIVE = 1;
 		public static final int NEGATIVE = -1;
@@ -52,23 +52,23 @@ public class Trend {
 		/*
 		 * Requires tick to be added to logger already
 		 */
-		public int getValue()
+		public void addItem()
 		{
 			double atr = AverageTrueRange.getAverageTrueRangeNDays(14);
 			double smoothedDirectionalMovement = 0;
-			for(int i = 1; i < 14; i++)
+			for(int i = 1; i < Math.min(14, tl.numberOfTicksRecorded()); i++)
 			{
 				double nDM = tl.getClosureOfDay(TickLogger.CONTINUOUS, i + 1).low - tl.getClosureOfDay(TickLogger.CONTINUOUS, i).low;
-				smoothedDirectionalMovement = nDM - 1/14 * nDM;
+				smoothedDirectionalMovement = nDM - 1/Math.min(14, tl.numberOfTicksRecorded()) * nDM;
 			}
 			smoothedDirectionalMovement += tl.getClosureOfDay(TickLogger.CONTINUOUS, 1).low - tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).low;
 			double negativeDirectionalMovement = smoothedDirectionalMovement / atr;
 			
 			smoothedDirectionalMovement = 0;
-			for(int i = 1; i < 14; i++)
+			for(int i = 1; i < Math.min(14, tl.numberOfTicksRecorded()); i++)
 			{
 				double nDM = tl.getClosureOfDay(TickLogger.CONTINUOUS, i + 1).high - tl.getClosureOfDay(TickLogger.CONTINUOUS, i).high;
-				smoothedDirectionalMovement = nDM - 1/14 * nDM;
+				smoothedDirectionalMovement = nDM - 1/Math.min(14, tl.numberOfTicksRecorded()) * nDM;
 			}
 			smoothedDirectionalMovement += tl.getClosureOfDay(TickLogger.CONTINUOUS, 1).high - tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).high;
 			double positiveDirectionalMovement = smoothedDirectionalMovement / atr;
@@ -92,6 +92,9 @@ public class Trend {
 			{
 				trendIndicator = STILL;
 			}
+		}
+		public int getValue()
+		{
 			return trendIndicator;
 		}
 	}
@@ -102,18 +105,19 @@ public class Trend {
 		adx = new AverageDirectionalIndex();
 	}
 	
-	public void addItem(Tick tick)
+	public void addItem()
 	{
-		adl.addTick(tick);
+		adl.addItem();
+		adx.addItem();
 	}
 	
-	public double getAccumulationDistributionLine()
+	public AccumulationDistributionLine getAccumulationDistributionLine()
 	{
-		return adl.getValue();
+		return adl;
 	}
 
-	public double getAverageDirectionalIndex()
+	public AverageDirectionalIndex getAverageDirectionalIndex()
 	{
-		return adx.getValue();
+		return adx;
 	}
 }

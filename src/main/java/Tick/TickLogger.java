@@ -209,6 +209,11 @@ public class TickLogger {
 		}
 	}
 	
+	public int numberOfTicksRecorded()
+	{
+		return frequencies.get(CONTINUOUS).size();
+	}
+	
 	public Tick getClosureOfDay(int frequency, int previousUnits)
 	{
 		if (frequencies.get(frequency).size() >= previousUnits)

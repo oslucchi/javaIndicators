@@ -31,14 +31,14 @@ public class AverageTrueRange {
 		return averageTrueRange;
 	}
 	
-	static public double getAverageTrueRangeNDays(int days)
+	public static double getAverageTrueRangeNDays(int days)
 	{
 		double averageTrueRange = 0;
-		for(int i = 0; i < days; i++)
+		for(int i = 0; i < Math.min(days, tl.numberOfTicksRecorded()); i++)
 		{
 			averageTrueRange += tl.getClosureOfDay(TickLogger.CONTINUOUS, i).trueRange;
 		}
-		averageTrueRange /= days;
+		averageTrueRange /= Math.min(days, tl.numberOfTicksRecorded());
 		return averageTrueRange;
 	}
 	

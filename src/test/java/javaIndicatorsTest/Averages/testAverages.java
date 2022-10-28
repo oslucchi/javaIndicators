@@ -2,52 +2,35 @@ package javaIndicatorsTest.Averages;
 
 import static org.junit.Assert.*;
 
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import Tick.Tick;
 import Tick.TickLogger;
 import javaIndicators.Averages.Averages;
+import javaIndicatorsTest.DataLoader;
 
 public class testAverages {
 	double avgCalc = 0;
 	List<Tick> tickList = new ArrayList<Tick>();
-	
-	@SuppressWarnings("unchecked")
-	public void readData() 
-	{
-        String filename = "docs/listData";
-        try
-        {   
-            // Reading the object from a file
-            FileInputStream file = new FileInputStream(filename);
-            ObjectInputStream in = new ObjectInputStream(file);
-            // Method for deserialization of object
-            tickList = (ArrayList<Tick>)in.readObject();
-            in.close();
-            file.close();
-        }
-        catch(IOException | ClassNotFoundException ex)
-        {
-			ex.printStackTrace();
-        }         
-	}
 
+	public testAverages()
+	{
+		tickList = DataLoader.populateTestData();
+	}
 	
+	@Ignore
 	@Test
 	public void testObjectCreation() 
 	{
 		Averages averages = new Averages(3);
 		assertNotNull(averages);
-		readData();
 	}
 
+	@Ignore
 	@Test
 	public void testMovingAverages() {
 		int[] weights = {1, 2, 3, 4};
@@ -136,7 +119,6 @@ public class testAverages {
 		};
 		
 		Averages averages = new Averages(3);
-		readData();
 		Averages.WeightedMovingAverage wma = averages.getWeightedMovingAverage();
 		Averages.SimpleMovingAverage sma = averages.getSimpleMovingAverage();
 		Averages.ExponentialMovingAverage ema = averages.getExponentialMovingAverages();
