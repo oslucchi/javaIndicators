@@ -36,7 +36,7 @@ public class AverageTrueRange {
 		double averageTrueRange = 0;
 		for(int i = 0; i < days; i++)
 		{
-			averageTrueRange += tl.getClosureOfDay(i).trueRange;
+			averageTrueRange += tl.getClosureOfDay(TickLogger.CONTINUOUS, i).trueRange;
 		}
 		averageTrueRange /= days;
 		return averageTrueRange;
@@ -52,7 +52,7 @@ public class AverageTrueRange {
 		else
 		{
 			averageTrueRange = (averageTrueRange * currentPeriod - 
-								tl.getClosureOfDay(periods).trueRange + 
+								tl.getClosureOfDay(TickLogger.CONTINUOUS, periods).trueRange + 
 								tick.trueRange) / periods;	
 		}
 	}

@@ -29,25 +29,25 @@ public class Averages {
 				field.setDouble(denominator, (double)(weights[period] * weights[period + 1]) / 2);
 				field.setDouble(weightedMovingAverage, 
 									(field.getDouble(weightedMovingAverage) +
-									 field.getDouble(tl.getClosureOfDay(0)) * weights[period]) /
+									 field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0)) * weights[period]) /
 									 field.getDouble(denominator));
 				field.setDouble(numerator, 
 									field.getDouble(numerator) + 
-									field.getDouble(tl.getClosureOfDay(0)) * weights[period]);
+									field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0)) * weights[period]);
 				field.setDouble(total, 
 									field.getDouble(total) + 
-									field.getDouble(tl.getClosureOfDay(0))); 
+									field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0))); 
 			}
 			else
 			{
 				field.setDouble(numerator,
 									field.getDouble(numerator) + 
-									(double) (weights[periods - 1] * field.getDouble(tl.getClosureOfDay(0)) - 
+									(double) (weights[periods - 1] * field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0)) - 
 									field.getDouble(total)));
 				field.setDouble(total, 
 									field.getDouble(total) + 
-									field.getDouble(tl.getClosureOfDay(0)) - 
-									field.getDouble(tl.getClosureOfDay(periods)));
+									field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0)) - 
+									field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, periods)));
 				field.setDouble(denominator, (double)(weights[periods - 1] * weights[period]) / 2);
 				field.setDouble(weightedMovingAverage, 
 									field.getDouble(numerator) / 
@@ -75,7 +75,7 @@ public class Averages {
 		
 		private void addItem() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 		{
-			Tick lastValueInPeriod = tl.getClosureOfDay(period);
+			Tick lastValueInPeriod = tl.getClosureOfDay(TickLogger.CONTINUOUS, period);
 			calculate("close", lastValueInPeriod);
 			calculate("open", lastValueInPeriod);
 			calculate("high", lastValueInPeriod);
@@ -103,15 +103,15 @@ public class Averages {
 			if (period < periods)
 			{
 				field.setDouble(simpleMovingAverage, (field.getDouble(simpleMovingAverage) * period +
-													  field.getDouble(tl.getClosureOfDay(0))) /
+													  field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0))) /
 													  (period + 1));
 			}
 			else
 			{
 				field.setDouble(simpleMovingAverage,
 									(field.getDouble(simpleMovingAverage) * periods - 
-									 field.getDouble(tl.getClosureOfDay(periods)) + 
-									 field.getDouble(tl.getClosureOfDay(0))) /
+									 field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, periods)) + 
+									 field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0))) /
 									periods);
 			}
 		}
@@ -148,7 +148,7 @@ public class Averages {
 			{
 				field.setDouble(exponentialMovingAverages, 
 									(field.getDouble(exponentialMovingAverages) * period +
-									 field.getDouble(tl.getClosureOfDay(0))) / 
+									 field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0))) / 
 									 (period + 1));
 			}
 			else
@@ -156,7 +156,7 @@ public class Averages {
 				k = 2.0 / (periods + 1);
 				field.setDouble(exponentialMovingAverages, 
 									(field.getDouble(exponentialMovingAverages) * (1 - k) +
-									 field.getDouble(tl.getClosureOfDay(0)) * k));
+									 field.getDouble(tl.getClosureOfDay(TickLogger.CONTINUOUS, 0)) * k));
 			}
 		}
 		

@@ -61,19 +61,19 @@ public class Trend {
 			double smoothedDirectionalMovement = 0;
 			for(int i = 1; i < 14; i++)
 			{
-				double nDM = tl.getClosureOfDay(i + 1).low - tl.getClosureOfDay(i).low;
+				double nDM = tl.getClosureOfDay(TickLogger.CONTINUOUS, i + 1).low - tl.getClosureOfDay(TickLogger.CONTINUOUS, i).low;
 				smoothedDirectionalMovement = nDM - 1/14 * nDM;
 			}
-			smoothedDirectionalMovement += tl.getClosureOfDay(1).low - tl.getClosureOfDay(0).low;
+			smoothedDirectionalMovement += tl.getClosureOfDay(TickLogger.CONTINUOUS, 1).low - tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).low;
 			double negativeDirectionalMovement = smoothedDirectionalMovement / atr;
 			
 			smoothedDirectionalMovement = 0;
 			for(int i = 1; i < 14; i++)
 			{
-				double nDM = tl.getClosureOfDay(i + 1).high - tl.getClosureOfDay(i).high;
+				double nDM = tl.getClosureOfDay(TickLogger.CONTINUOUS, i + 1).high - tl.getClosureOfDay(TickLogger.CONTINUOUS, i).high;
 				smoothedDirectionalMovement = nDM - 1/14 * nDM;
 			}
-			smoothedDirectionalMovement += tl.getClosureOfDay(1).high - tl.getClosureOfDay(0).high;
+			smoothedDirectionalMovement += tl.getClosureOfDay(TickLogger.CONTINUOUS, 1).high - tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).high;
 			double positiveDirectionalMovement = smoothedDirectionalMovement / atr;
 			if (negativeDirectionalMovement > positiveDirectionalMovement)
 			{

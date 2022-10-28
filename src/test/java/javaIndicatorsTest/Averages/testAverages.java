@@ -2,6 +2,8 @@ package javaIndicatorsTest.Averages;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
+
 import org.junit.Test;
 
 import Tick.Tick;
@@ -78,13 +80,14 @@ public class testAverages {
 		
 		wma.setWeights(weights);
 		TickLogger tl = TickLogger.getInstance();
-		
+		Date start = new Date();
 		for(int newItem = 0; newItem < 99; newItem++)
 		{
 			Tick t = new Tick();
 			t.close = (double)(newItem + 1);
 			t.high = (double)(newItem + 1.5);
 			t.low = (double)(newItem + .5);
+			t.timestamp = new Date(start.getTime() + 175 * newItem);
 			tl.addTick(t);
 			try {
 				averages.addItem();
