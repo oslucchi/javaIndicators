@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import Tick.Tick;
+import Tick.TickLogger;
 import javaIndicators.Averages.Averages;
 
 public class testAverages {
@@ -16,9 +18,9 @@ public class testAverages {
 	}
 
 	@Test
-	public void testWeightedMovingAverage() {
+	public void testMovingAverages() {
 		int[] weights = {1, 2, 3, 4};
-		double results[] = {
+		double resultsWMA[] = {
 				0, 1.0, 1.6666666666666667, 2.3333333333333335, 3.3333333333333335, 4.333333333333333, 5.333333333333333, 
 				6.333333333333333, 7.333333333333333, 8.333333333333334, 9.333333333333334, 10.333333333333334, 
 				11.333333333333334, 12.333333333333334, 13.333333333333334, 14.333333333333334, 15.333333333333334, 
@@ -41,51 +43,67 @@ public class testAverages {
 				96.33333333333333, 97.33333333333333, 98.33333333333333 
 		};
 		
-		Averages averages = new Averages(3);
-		Averages.WeightedMovingAverage wma = averages.getWeightedMovingAverage();
-		wma.setWeights(weights);
-
-		for(int newItem = 1; newItem < 100; newItem++)
-		{
-			averages.addItem((double)(newItem));
-			assertEquals(results[newItem], wma.getAverage(), 0.00001);
-		}
-	}
-	
-	@Test
-	public void testSimpleMovingAverage() {
-		double[] results = {
-					0, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 
-					16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 
-					31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 
-					46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 
-					61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 
-					76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 
-					91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 
+		double[] resultsSMA = {
+				0, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 
+				16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 
+				31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 
+				46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 
+				61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 
+				76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 
+				91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 
 		};
 
+		double[] resultsEMA = {
+				1.0, 1.5, 2.25, 3.125, 4.0625, 5.03125, 
+				6.015625, 7.0078125, 8.00390625, 9.001953125, 10.0009765625, 
+				11.00048828125, 12.000244140625, 13.0001220703125, 14.00006103515625, 15.000030517578125, 
+				16.000015258789062, 17.00000762939453, 18.000003814697266, 19.000001907348633, 20.000000953674316, 
+				21.000000476837158, 22.00000023841858, 23.00000011920929, 24.000000059604645, 25.000000029802322, 
+				26.00000001490116, 27.00000000745058, 28.00000000372529, 29.000000001862645, 30.000000000931323, 
+				31.00000000046566, 32.00000000023283, 33.000000000116415, 34.00000000005821, 35.000000000029104, 
+				36.00000000001455, 37.000000000007276, 38.00000000000364, 39.00000000000182, 40.00000000000091, 
+				41.000000000000455, 42.00000000000023, 43.000000000000114, 44.00000000000006, 45.00000000000003, 
+				46.000000000000014, 47.00000000000001, 48.0, 49.0, 50.0, 
+				51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 
+				61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 
+				71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 
+				81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 
+				91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0
+		};
+		
 		Averages averages = new Averages(3);
+		Averages.WeightedMovingAverage wma = averages.getWeightedMovingAverage();
 		Averages.SimpleMovingAverage sma = averages.getSimpleMovingAverage();
-		
-		for(int newItem = 1; newItem < 100; newItem++)
-		{
-			averages.addItem((double)(newItem));
-			assertEquals(results[newItem], sma.getAverage(),0.00001);
-		}
-	}
-	
-	@Test
-	public void testExponentialMovingAverages() {
-		double[] input = {11,12,14,18,12,15,13,16,10};
-		double[] results = {11,11.5,12.75,15.375,13.688,14.344,13.672,14.836,12.418};
-		
-		Averages averages = new Averages(3);
 		Averages.ExponentialMovingAverage ema = averages.getExponentialMovingAverages();
 		
-		for(int newItem = 0; newItem < 9; newItem++)
+		wma.setWeights(weights);
+		TickLogger tl = TickLogger.getInstance();
+		
+		for(int newItem = 0; newItem < 99; newItem++)
 		{
-			averages.addItem(input[newItem]);
-			assertEquals(results[newItem], ema.getAverage(),0.1);
+			Tick t = new Tick();
+			t.close = (double)(newItem + 1);
+			t.high = (double)(newItem + 1.5);
+			t.low = (double)(newItem + .5);
+			tl.addTick(t);
+			try {
+				averages.addItem();
+			} catch (NoSuchFieldException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			assertEquals(resultsWMA[newItem + 1], wma.getAverage().close, 0.00001);
+			assertEquals(resultsSMA[newItem + 1], sma.getAverage().close, 0.00001);
+			assertEquals(resultsEMA[newItem], ema.getAverage().close, 0.00001);
 		}
 	}
 }
