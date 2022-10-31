@@ -7,6 +7,9 @@ public class Trend {
 	private AccumulationDistributionLine adl;
 	private AverageDirectionalIndex adx;
 	private TickLogger tl = TickLogger.getInstance();
+	private int periods;
+	private int period = 0;
+	
 	
 	public class AccumulationDistributionLine {
 		double moneyFlowMultiplier;
@@ -34,73 +37,156 @@ public class Trend {
 	}
 	
 	public class AverageDirectionalIndex {
+
+		public static final int PLUS = 0;
+		public static final int MINUS = 1;
+		
 		public static final int CROSS_POSITIVE = 2;
 		public static final int POSITIVE = 1;
 		public static final int NEGATIVE = -1;
 		public static final int CROSS_NEGATIVE = -2;
 		public static final int STILL = 0;
+
+		double[] smoothedDirectionalMovement = {0., 0.};
 		
-		double previousNDM;
-		double previousPDM;
+		double averageDirectionalIndex = 0.;
+		double[] periodDirectionalIndex = new double[periods];
 		
 		int trendIndicator;
-				
+
 		public AverageDirectionalIndex()
 		{
 		}
 		
-		/*
-		 * Requires tick to be added to logger already
-		 */
 		public void addItem()
 		{
-			double atr = AverageTrueRange.getAverageTrueRangeNDays(14);
-			double smoothedDirectionalMovement = 0;
-			for(int i = 1; i < Math.min(14, tl.numberOfTicksRecorded()); i++)
-			{
-				double nDM = tl.getClosureOfDay(TickLogger.CONTINUOUS, i + 1).low - tl.getClosureOfDay(TickLogger.CONTINUOUS, i).low;
-				smoothedDirectionalMovement = nDM - 1/Math.min(14, tl.numberOfTicksRecorded()) * nDM;
-			}
-			smoothedDirectionalMovement += tl.getClosureOfDay(TickLogger.CONTINUOUS, 1).low - tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).low;
-			double negativeDirectionalMovement = smoothedDirectionalMovement / atr;
+			double periodAtr = AverageTrueRange.getTrueRangeNDays(period < periods - 1 ? period + 1: periods);
+			double[] directionIndicator = {0., 0.};
+			double[] directionalMovement = {0., 0.};
+			double directionalIndex = 0;
 			
-			smoothedDirectionalMovement = 0;
-			for(int i = 1; i < Math.min(14, tl.numberOfTicksRecorded()); i++)
+			Tick current = tl.getClosureOfDay(TickLogger.CONTINUOUS, 0);
+			Tick previous = tl.getClosureOfDay(TickLogger.CONTINUOUS, 1);
+			if (current.high - previous.high > previous.low - current.low)
 			{
-				double nDM = tl.getClosureOfDay(TickLogger.CONTINUOUS, i + 1).high - tl.getClosureOfDay(TickLogger.CONTINUOUS, i).high;
-				smoothedDirectionalMovement = nDM - 1/Math.min(14, tl.numberOfTicksRecorded()) * nDM;
+				directionalMovement[PLUS] = Math.max(current.high - previous.high, 0.);
+				directionalMovement[MINUS] = 0.;
 			}
-			smoothedDirectionalMovement += tl.getClosureOfDay(TickLogger.CONTINUOUS, 1).high - tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).high;
-			double positiveDirectionalMovement = smoothedDirectionalMovement / atr;
-			if (negativeDirectionalMovement > positiveDirectionalMovement)
+			else if (previous.low - current.low > current.high - previous.high)
 			{
-				trendIndicator = NEGATIVE;				
-				if (previousNDM <= previousPDM)
-				{
-					trendIndicator = CROSS_NEGATIVE;
-				}
-			}	
-			else if (positiveDirectionalMovement > negativeDirectionalMovement)
+				directionalMovement[PLUS] = 0.;
+				directionalMovement[MINUS] = Math.max(previous.low - current.low, 0.);
+			}
+
+			if (period < periods - 1)
 			{
-				trendIndicator = POSITIVE;
-				if (previousPDM <= previousNDM)
-				{
-					trendIndicator = CROSS_POSITIVE;
-				}
+				smoothedDirectionalMovement[PLUS] += directionalMovement[PLUS];
+				smoothedDirectionalMovement[MINUS] += directionalMovement[MINUS];
 			}
 			else
 			{
-				trendIndicator = STILL;
+				if (period == periods)
+				{
+					smoothedDirectionalMovement[PLUS] += directionalMovement[PLUS];
+					smoothedDirectionalMovement[MINUS] += directionalMovement[MINUS];
+				}
+				else
+				{
+					smoothedDirectionalMovement[PLUS] = smoothedDirectionalMovement[PLUS] -
+														(smoothedDirectionalMovement[PLUS] / periods) +
+														directionalMovement[PLUS];
+					
+					smoothedDirectionalMovement[MINUS] = smoothedDirectionalMovement[MINUS] -
+							  							 (smoothedDirectionalMovement[MINUS] / periods) +														  
+							  							 directionalMovement[MINUS];
+				}
+				directionIndicator[PLUS] = smoothedDirectionalMovement[PLUS] * 100 / periodAtr;
+				directionIndicator[MINUS] = smoothedDirectionalMovement[MINUS] * 100 / periodAtr;
+				
+				directionalIndex = 
+						(Math.abs(directionIndicator[PLUS] - directionIndicator[MINUS]) /
+						 Math.abs(directionIndicator[PLUS] + directionIndicator[MINUS])) * 100;
+				
+				averageDirectionalIndex = ((averageDirectionalIndex * periods -
+										    periodDirectionalIndex[period % periods]) + 
+										   directionalIndex) / 
+										  periods;
+				periodDirectionalIndex[period % periods] = directionalIndex;
+				
+				if (directionIndicator[PLUS] > directionIndicator[MINUS])
+				{
+					
+					if (trendIndicator == NEGATIVE)
+					{
+						trendIndicator = CROSS_POSITIVE;
+					}
+					else
+					{
+						trendIndicator = POSITIVE;				
+					}
+				}	
+				else if (directionIndicator[MINUS] > directionIndicator[PLUS])
+				{
+					
+					if (trendIndicator == POSITIVE)
+					{
+						trendIndicator = CROSS_NEGATIVE;
+					}
+					else
+					{
+						trendIndicator = NEGATIVE;				
+					}
+				}	
+				else
+				{
+					trendIndicator = STILL;
+				}
 			}
+		
+//			System.out.format("%03d;%7.4f;%7.4f;%7.4f;%7.4f;%9d;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%6.4f;%d\n",
+//								circularArrayIndex,
+//								current.open,
+//								current.high,
+//								current.low,
+//								current.close,
+//								current.tradedVolume,
+//								current.trueRange,
+//								directionalMovement[PLUS],
+//								directionalMovement[MINUS],
+//								periodAtr,
+//								smoothedDirectionalMovement[PLUS],
+//								smoothedDirectionalMovement[MINUS],
+//								directionIndicator[PLUS],
+//								directionIndicator[MINUS],
+//								Math.abs(directionIndicator[PLUS] + directionIndicator[MINUS]),
+//								Math.abs(directionIndicator[PLUS] - directionIndicator[MINUS]),
+//								directionalIndex,
+//								averageDirectionalIndex,
+//								trendIndicator 
+//							);
+
+//			System.out.print(", " + averageDirectionalIndex);
+//			System.out.print(", " + trendIndicator);
 		}
-		public int getValue()
+
+		
+		/*
+		 * Requires tick to be added to logger already
+		 */
+		public double getValue()
+		{
+			return averageDirectionalIndex;
+		}
+		
+		public int getSytnteticIndicator()
 		{
 			return trendIndicator;
 		}
 	}
 	
-	public Trend()
+	public Trend(int periods)
 	{
+		this.periods = periods;
 		adl = new AccumulationDistributionLine();
 		adx = new AverageDirectionalIndex();
 	}
@@ -109,6 +195,7 @@ public class Trend {
 	{
 		adl.addItem();
 		adx.addItem();
+		period++;
 	}
 	
 	public AccumulationDistributionLine getAccumulationDistributionLine()

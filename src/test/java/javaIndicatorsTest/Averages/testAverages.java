@@ -11,7 +11,7 @@ import org.junit.Test;
 import Tick.Tick;
 import Tick.TickLogger;
 import javaIndicators.Averages.Averages;
-import javaIndicatorsTest.DataLoader;
+import utils.DataLoader;
 
 public class testAverages {
 	double avgCalc = 0;
@@ -19,7 +19,7 @@ public class testAverages {
 
 	public testAverages()
 	{
-		tickList = DataLoader.populateTestData();
+		tickList = DataLoader.populateTestData("docs/averageMarketData.ser");
 	}
 	
 	@Ignore

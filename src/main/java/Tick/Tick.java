@@ -26,6 +26,18 @@ public class Tick implements Serializable {
 		tradedVolume = (long) 0;
 		timestamp = new Date();
 	}
+	
+	public Tick duplicate()
+	{
+		Tick newTick = new Tick();
+		newTick.open = this.open;
+		newTick.high = this.high;
+		newTick.low = this.low;
+		newTick.close = this.close;
+		newTick.tradedVolume = this.tradedVolume;
+		newTick.trueRange = this.trueRange;
+		return newTick;
+	}
 
 	public Date getTimestamp() {
 		return timestamp;

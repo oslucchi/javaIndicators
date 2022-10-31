@@ -42,6 +42,16 @@ public class AverageTrueRange {
 		return averageTrueRange;
 	}
 	
+	public static double getTrueRangeNDays(int days)
+	{
+		double averageTrueRange = 0;
+		for(int i = 0; i < Math.min(days, tl.numberOfTicksRecorded() - 1); i++)
+		{
+			averageTrueRange += tl.getClosureOfDay(TickLogger.CONTINUOUS, i).trueRange;
+		}
+		return averageTrueRange;
+	}
+	
 	public void addTick(Tick tick)
 	{
 		if (currentPeriod < periods - 1)
