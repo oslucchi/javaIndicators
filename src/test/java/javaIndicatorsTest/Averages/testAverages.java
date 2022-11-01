@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import Tick.Tick;
@@ -22,7 +21,6 @@ public class testAverages {
 		tickList = DataLoader.populateTestData("docs/averageMarketData.ser");
 	}
 	
-	@Ignore
 	@Test
 	public void testObjectCreation() 
 	{
@@ -30,7 +28,6 @@ public class testAverages {
 		assertNotNull(averages);
 	}
 
-	@Ignore
 	@Test
 	public void testMovingAverages() {
 		int[] weights = {1, 2, 3, 4};

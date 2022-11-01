@@ -24,7 +24,8 @@ public class DataLoader {
 		Tick tick;
 		try {
 			Date start = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2022/10/01 09:00:03");
-			reader = new BufferedReader(new FileReader("docs/adxMarketData.csv"));
+//			reader = new BufferedReader(new FileReader("docs/adxMarketData.csv"));
+			reader = new BufferedReader(new FileReader("docs/adlMarketData.csv"));
 			String line = reader.readLine();
 			while (line != null) {
 				split = line.split(";");
@@ -48,7 +49,8 @@ public class DataLoader {
 				line = reader.readLine();
 			}
 			reader.close();
-            FileOutputStream fos = new FileOutputStream("docs/adxMarketData.ser");
+//            FileOutputStream fos = new FileOutputStream("docs/adxMarketData.ser");
+            FileOutputStream fos = new FileOutputStream("docs/adlMarketData.ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(tickList);
             oos.close();

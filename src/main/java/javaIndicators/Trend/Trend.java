@@ -1,4 +1,6 @@
 package javaIndicators.Trend;
+import java.util.List;
+
 import Tick.Tick;
 import Tick.TickLogger;
 import javaIndicators.Averages.AverageTrueRange;
@@ -6,7 +8,7 @@ import javaIndicators.Averages.AverageTrueRange;
 public class Trend {
 	private AccumulationDistributionLine adl;
 	private AverageDirectionalIndex adx;
-	private TickLogger tl = TickLogger.getInstance();
+	private List<Tick> tl;
 	private int periods;
 	private int period = 0;
 	
@@ -24,7 +26,7 @@ public class Trend {
 		}		
 		public void addItem()
 		{
-			Tick tick = tl.getClosureOfDay(TickLogger.CONTINUOUS, 0);
+			Tick tick = tl.get(0);
 			moneyFlowMultiplier = ((tick.close - tick.low) - (tick.high - tick.close))/(tick.high - tick.low); 
 			moneyFlowVolume = moneyFlowMultiplier * tick.tradedVolume; 
 			accumulationDistributionLine += moneyFlowVolume;
@@ -47,26 +49,28 @@ public class Trend {
 		public static final int CROSS_NEGATIVE = -2;
 		public static final int STILL = 0;
 
-		double[] smoothedDirectionalMovement = {0., 0.};
+		private double[] smoothedDirectionalMovement = {0., 0.};
 		
-		double averageDirectionalIndex = 0.;
-		double[] periodDirectionalIndex = new double[periods];
+		private double averageDirectionalIndex = 0.;
+		private double[] periodDirectionalIndex = new double[periods];
 		
-		int trendIndicator;
+		private int trendIndicator;		
+		private AverageTrueRange atr;
 
 		public AverageDirectionalIndex()
 		{
+			atr = new AverageTrueRange(14, tl);
 		}
 		
 		public void addItem()
 		{
-			double periodAtr = AverageTrueRange.getTrueRangeNDays(period < periods - 1 ? period + 1: periods);
+			double periodAtr = atr.getPeriodAverageTrueRange();
 			double[] directionIndicator = {0., 0.};
 			double[] directionalMovement = {0., 0.};
 			double directionalIndex = 0;
 			
-			Tick current = tl.getClosureOfDay(TickLogger.CONTINUOUS, 0);
-			Tick previous = tl.getClosureOfDay(TickLogger.CONTINUOUS, 1);
+			Tick current = tl.get(0);
+			Tick previous = tl.get(1);
 			if (current.high - previous.high > previous.low - current.low)
 			{
 				directionalMovement[PLUS] = Math.max(current.high - previous.high, 0.);
@@ -184,8 +188,9 @@ public class Trend {
 		}
 	}
 	
-	public Trend(int periods)
+	public Trend(int periods, int useFrequency)
 	{
+		tl = TickLogger.getInstance().getTickList(useFrequency);
 		this.periods = periods;
 		adl = new AccumulationDistributionLine();
 		adx = new AverageDirectionalIndex();

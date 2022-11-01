@@ -1,17 +1,19 @@
 package javaIndicators.Averages;
 
+import java.util.List;
+
 import Tick.Tick;
-import Tick.TickLogger;
 
 public class AverageTrueRange {
 	double averageTrueRange;
 	int periods;
 	int currentPeriod;
-	private static TickLogger tl = TickLogger.getInstance();
+	private List<Tick> tl = null;
 	
-	public AverageTrueRange(int periods)
+	public AverageTrueRange(int periods, List<Tick> tl)
 	{
 		this.periods = periods; 
+		this.tl = tl;
 		currentPeriod = 0;
 	}
 	
@@ -31,23 +33,43 @@ public class AverageTrueRange {
 		return averageTrueRange;
 	}
 	
-	public static double getAverageTrueRangeNDays(int days)
+	public double getAverageTrueRangeNDays(int periods)
 	{
 		double averageTrueRange = 0;
-		for(int i = 0; i < Math.min(days, tl.numberOfTicksRecorded()); i++)
+		if (tl.size() < periods)
+			periods = tl.size();
+		
+		for(int i = 0; i < periods; i++)
 		{
-			averageTrueRange += tl.getClosureOfDay(TickLogger.CONTINUOUS, i).trueRange;
+//			averageTrueRange += tl.getClosureOfDay(TickLogger.CONTINUOUS, i).trueRange;
+			averageTrueRange += tl.get(i).trueRange;
 		}
-		averageTrueRange /= Math.min(days, tl.numberOfTicksRecorded());
+		averageTrueRange /= periods;
 		return averageTrueRange;
 	}
 	
-	public static double getTrueRangeNDays(int days)
+	public double getPeriodAverageTrueRange()
 	{
 		double averageTrueRange = 0;
-		for(int i = 0; i < Math.min(days, tl.numberOfTicksRecorded() - 1); i++)
+		
+		for(int i = 0; i < (tl.size() < periods ? tl.size() : periods); i++)
 		{
-			averageTrueRange += tl.getClosureOfDay(TickLogger.CONTINUOUS, i).trueRange;
+			averageTrueRange += tl.get(i).trueRange;
+		}
+		averageTrueRange /= (tl.size() < periods ? tl.size() : periods);
+		return averageTrueRange;
+	}
+
+	public double getTrueRangeNDays(int periods)
+	{
+		double averageTrueRange = 0;
+
+		if (tl.size() < periods)
+			periods = tl.size();
+
+		for(int i = 0; i < periods; i++)
+		{
+			averageTrueRange += tl.get(i).trueRange;
 		}
 		return averageTrueRange;
 	}
@@ -62,7 +84,7 @@ public class AverageTrueRange {
 		else
 		{
 			averageTrueRange = (averageTrueRange * currentPeriod - 
-								tl.getClosureOfDay(TickLogger.CONTINUOUS, periods).trueRange + 
+								tl.get(periods).trueRange + 
 								tick.trueRange) / periods;	
 		}
 	}

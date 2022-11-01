@@ -179,4 +179,9 @@ public class TickLogger {
 		else
 			return null;
 	}
+	
+	public List<Tick> getTickList(int frequency)
+	{
+		return frequencies.get(frequency);
+	}
 }
