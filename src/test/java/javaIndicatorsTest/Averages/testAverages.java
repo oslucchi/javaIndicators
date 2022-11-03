@@ -9,7 +9,10 @@ import org.junit.Test;
 
 import Tick.Tick;
 import Tick.TickLogger;
-import javaIndicators.Averages.Averages;
+import javaIndicators.Averages.ExponentialMovingAverage;
+import javaIndicators.Averages.SimpleMovingAverage;
+import javaIndicators.Averages.SmoothedMovingAverage;
+import javaIndicators.Averages.WeightedMovingAverage;
 import utils.DataLoader;
 
 public class testAverages {
@@ -24,8 +27,12 @@ public class testAverages {
 	@Test
 	public void testObjectCreation() 
 	{
-		Averages averages = new Averages(3);
-		assertNotNull(averages);
+		WeightedMovingAverage wma = new WeightedMovingAverage(3, TickLogger.CONTINUOUS);
+		SimpleMovingAverage sma = new SimpleMovingAverage(3, TickLogger.CONTINUOUS);
+		ExponentialMovingAverage ema = new ExponentialMovingAverage(3, TickLogger.CONTINUOUS);
+		assertNotNull(wma);
+		assertNotNull(ema);
+		assertNotNull(sma);
 	}
 
 	@Test
@@ -115,10 +122,9 @@ public class testAverages {
 				52.727682220,52.738841110,52.669420555,52.709710278
 		};
 		
-		Averages averages = new Averages(3);
-		Averages.WeightedMovingAverage wma = averages.getWeightedMovingAverage();
-		Averages.SimpleMovingAverage sma = averages.getSimpleMovingAverage();
-		Averages.ExponentialMovingAverage ema = averages.getExponentialMovingAverages();
+		WeightedMovingAverage wma = new WeightedMovingAverage(3, TickLogger.CONTINUOUS);
+		SimpleMovingAverage sma = new SimpleMovingAverage(3, TickLogger.CONTINUOUS);
+		ExponentialMovingAverage ema = new ExponentialMovingAverage(3, TickLogger.CONTINUOUS);
 		
 		wma.setWeights(weights);
 		TickLogger tl = TickLogger.getInstance();
@@ -127,7 +133,9 @@ public class testAverages {
 			tl.addTick(tickList.get(newItem));
 			try 
 			{
-				averages.addItem();
+				wma.addItem();
+				ema.addItem();
+				sma.addItem();
 			} 
 			catch (NoSuchFieldException | SecurityException |
 				   IllegalArgumentException | IllegalAccessException e)
@@ -138,6 +146,41 @@ public class testAverages {
 			assertEquals(resultsSMA[newItem], sma.getAverage().close, 0.0000001);
 			assertEquals(resultsWMA[newItem], wma.getAverage().close, 0.0000001);
 			assertEquals(resultsEMA[newItem], ema.getAverage().close, 0.0000001);
+		}
+	}
+	
+	@Test
+	public void testSmoothedMovingAverages() {
+		double[] resultsSMMA = {
+				 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 
+				 0.0000, 0.0000,48.3392,48.3931,48.4114,48.3605,48.2751,48.2139,48.1413,48.0850,
+				 47.9931,47.8483,47.7269,47.5971,47.5758,47.5784,47.5724,47.6522,47.7082,47.7652,
+				 47.8456,47.9659,48.0709,48.2085,48.3317,48.4808,48.6492,48.7854,48.9104,49.0411,
+				 49.0380,49.0612,49.0426,49.0232,48.9776,48.9362,48.8811,48.8295,48.7342,48.6538,
+				 48.5774,48.4991,48.4084,48.2632,48.1283,48.0184,47.9409,47.8662,47.8434,47.8839,
+				 47.9005,47.9420,47.9803,48.0065,48.0406,48.0459,48.0393,48.0963,48.1104,48.0596,
+				 48.0196,48.0004,48.0304,48.0958,48.1676,48.2347,48.2790,48.3644,48.4687,48.5127,
+				 48.6494,48.8010,48.9240,49.0737,49.2072,49.3544,49.4825,49.5823,49.6575,49.7377,
+				 49.7971,49.8458,49.9269,50.0325,50.1346,50.1943,50.2924,50.3630,50.4197,50.4412,
+				 50.4588,50.4735,50.4717,50.4801,50.4831,50.4514,50.4505,50.4781,50.5060,50.5401,
+				 50.5647,50.6244,50.7056,50.7851,50.8509,50.9908,51.1200,51.2477,51.3879,51.4996,
+				 51.5858,51.6753,51.7464,51.82361 
+		};
+		TickLogger tl = TickLogger.getInstance();
+		SmoothedMovingAverage smma = new SmoothedMovingAverage(13, TickLogger.CONTINUOUS);
+		for(int newItem = 0; newItem < tickList.size(); newItem++)
+		{
+			tl.addTick(tickList.get(newItem));
+			try 
+			{
+				smma.addItem();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+//			System.out.format("%7.4f, %7.4f\n", tl.getClosureOfDay(TickLogger.CONTINUOUS, 0).close, smma.getValue());
+			assertEquals(resultsSMMA[newItem], smma.getValue(), 0.001);
 		}
 	}
 }
