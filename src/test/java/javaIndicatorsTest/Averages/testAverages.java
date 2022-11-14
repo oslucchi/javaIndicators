@@ -152,8 +152,9 @@ public class testAverages {
 	@Test
 	public void testSmoothedMovingAverages() {
 		double[] resultsSMMA = {
-				 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 
-				 0.0000, 0.0000,48.3392,48.3931,48.4114,48.3605,48.2751,48.2139,48.1413,48.0850,
+				  0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
+				  0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 
+				  0.0000, 0.0000,48.3392,48.3931,48.4114,48.3605,48.2751,48.2139,48.1413,48.0850,
 				 47.9931,47.8483,47.7269,47.5971,47.5758,47.5784,47.5724,47.6522,47.7082,47.7652,
 				 47.8456,47.9659,48.0709,48.2085,48.3317,48.4808,48.6492,48.7854,48.9104,49.0411,
 				 49.0380,49.0612,49.0426,49.0232,48.9776,48.9362,48.8811,48.8295,48.7342,48.6538,
@@ -167,7 +168,7 @@ public class testAverages {
 				 51.5858,51.6753,51.7464,51.82361 
 		};
 		TickLogger tl = TickLogger.getInstance();
-		SmoothedMovingAverage smma = new SmoothedMovingAverage(13, TickLogger.CONTINUOUS);
+		SmoothedMovingAverage smma = new SmoothedMovingAverage(13, 8, TickLogger.CONTINUOUS);
 		for(int newItem = 0; newItem < tickList.size(); newItem++)
 		{
 			tl.addTick(tickList.get(newItem));

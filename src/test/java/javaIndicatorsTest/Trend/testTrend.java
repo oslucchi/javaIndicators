@@ -63,7 +63,7 @@ public class testTrend {
 			tl.addTick(tickList.get(i));
 			trend.addItem();
 			assertEquals(resultsADL[i], adl.getValue(), 0.000001);
-			System.out.println(adl.getValue() + " ");
+//			System.out.println(adl.getValue() + " ");
 		}
 	}
 

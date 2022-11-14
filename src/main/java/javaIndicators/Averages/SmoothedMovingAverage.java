@@ -12,13 +12,15 @@ public class SmoothedMovingAverage {
     double prevValue = 0.;
     int period = 0;
     int periods;
+    int shift;
     List<Tick> tl;
     
-    public SmoothedMovingAverage(int periods, int frequency)
+    public SmoothedMovingAverage(int periods, int shift, int frequency)
     {
     	        // initialize
         smmaResults = new double[periods];
         this.periods = periods;
+        this.shift = shift;
         this.tl = TickLogger.getInstance().getTickList(frequency);
     }
     
@@ -26,21 +28,18 @@ public class SmoothedMovingAverage {
     {        
         // roll through quotes
         double smma = 0.;
-        Tick tick = tl.get(0);
 
         // calculate SMMA
-        if (period + 1 > periods)
+        if (period + 1 - shift > periods)
         {
-            smma = ((prevValue * (periods - 1)) + tick.close) / periods;
+            smma = ((prevValue * (periods - 1)) + tl.get(shift).close) / periods;
         }
-
-        // first SMMA calculated as simple SMA
-        else if (period + 1 == periods)
+        else if (period + 1 - shift == periods)
         {
             double sumClose = 0;
-            for (int p = period + 1 - periods; p <= period; p++)
+            for (int p = period + 1 - shift - periods; p < periods; p++)
             {
-                sumClose += tl.get(p).close;
+                sumClose += tl.get(p+shift).close;
             }
 
             smma = sumClose / periods;
